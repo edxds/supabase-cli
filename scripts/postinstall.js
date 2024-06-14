@@ -5,14 +5,10 @@
 "use strict";
 
 import binLinks from "bin-links";
-import { createHash } from "crypto";
 import fs from "fs";
 import fetch from "node-fetch";
-import { Agent } from "https";
-import { HttpsProxyAgent } from "https-proxy-agent";
 import path from "path";
-import { extract } from "tar";
-import zlib from "zlib";
+import child from "child_process";
 
 // Mapping from Node's `process.arch` to Golang's `$GOARCH`
 const ARCH_MAPPING = {
@@ -108,55 +104,17 @@ async function main() {
   const binDir = path.dirname(binPath);
   await fs.promises.mkdir(binDir, { recursive: true });
 
-  // First we will Un-GZip, then we will untar.
-  const ungz = zlib.createGunzip();
-  const binName = path.basename(binPath);
-  const untar = extract({ cwd: binDir }, [binName]);
-
-  const url = getDownloadUrl(pkg);
-  console.info("Downloading", url);
-  const proxyUrl =
-    process.env.npm_config_https_proxy ||
-    process.env.npm_config_http_proxy ||
-    process.env.npm_config_proxy;
-
-  // Keeps the TCP connection alive when sending multiple requests
-  // Ref: https://github.com/node-fetch/node-fetch/issues/1735
-  const agent = proxyUrl
-    ? new HttpsProxyAgent(proxyUrl, { keepAlive: true })
-    : new Agent({ keepAlive: true });
-  const resp = await fetch(url, { agent });
-
-  const hash = createHash("sha256");
-  const pkgNameWithPlatform = `${pkg.name}_${platform}_${arch}.tar.gz`;
-  const checksumMap = await fetchAndParseCheckSumFile(pkg, agent);
-
-  resp.body
-    .on("data", (chunk) => {
-      hash.update(chunk);
-    })
-    .pipe(ungz);
-
-  ungz
-    .on("end", () => {
-      const expectedChecksum = checksumMap?.[pkgNameWithPlatform];
-      // Skip verification if we can't find the file checksum
-      if (!expectedChecksum) {
-        console.warn("Skipping checksum verification");
-        return;
-      }
-      const calculatedChecksum = hash.digest("hex");
-      if (calculatedChecksum !== expectedChecksum) {
-        throw errChecksum;
-      }
-      console.info("Checksum verified.");
-    })
-    .pipe(untar);
-
+  console.info("Compiling Go sources...");
   await new Promise((resolve, reject) => {
-    untar.on("error", reject);
-    untar.on("end", () => resolve());
+    const gc = child.spawn("go", ["build", "main.go"]);
+    gc.stdout.on("data", console.log);
+    gc.stderr.on("data", console.error);
+    gc.on("close", (code) =>
+      !code ? resolve() : reject(`Process exited with code ${code}`)
+    );
   });
+
+  await fs.promises.rename("./main", binPath);
 
   // Link the binaries in postinstall to support yarn
   await binLinks({

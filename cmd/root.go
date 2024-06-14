@@ -86,7 +86,7 @@ var (
 
 	rootCmd = &cobra.Command{
 		Use:     "supabase",
-		Short:   "Supabase CLI " + utils.Version,
+		Short:   "Supabase CLI " + utils.Version + " (@edxds)",
 		Version: utils.Version,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			if IsExperimental(cmd) && !viper.GetBool("EXPERIMENTAL") {
