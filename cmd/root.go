@@ -240,6 +240,7 @@ func init() {
 	flags := rootCmd.PersistentFlags()
 	flags.Bool("debug", false, "output debug logs to stderr")
 	flags.String("workdir", "", "path to a Supabase project directory")
+	flags.String("config", "", "path to an alternative config.toml")
 	flags.Bool("experimental", false, "enable experimental features")
 	flags.String("network-id", "", "use the specified docker network instead of a generated one")
 	flags.Var(&utils.DNSResolver, "dns-resolver", "lookup domain names using the specified resolver")

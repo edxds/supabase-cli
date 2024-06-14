@@ -567,7 +567,7 @@ func LoadConfigFS(fsys afero.Fs) error {
 		return errors.Errorf("failed to decode config template: %w", err)
 	}
 	// Load user defined config
-	if metadata, err := toml.DecodeFS(afero.NewIOFS(fsys), ConfigPath, &Config); err != nil {
+	if metadata, err := toml.DecodeFS(afero.NewIOFS(fsys), ConfigPath(), &Config); err != nil {
 		CmdSuggestion = fmt.Sprintf("Have you set up the project with %s?", Aqua("supabase init"))
 		cwd, osErr := os.Getwd()
 		if osErr != nil {
@@ -917,7 +917,7 @@ func InitConfig(params InitParams, fsys afero.Fs) error {
 	}
 	params.ProjectId = sanitizeProjectId(params.ProjectId)
 	// Create config file
-	if err := MkdirIfNotExistFS(fsys, filepath.Dir(ConfigPath)); err != nil {
+	if err := MkdirIfNotExistFS(fsys, filepath.Dir(ConfigPath())); err != nil {
 		return err
 	}
 	flag := os.O_WRONLY | os.O_CREATE
@@ -926,7 +926,7 @@ func InitConfig(params InitParams, fsys afero.Fs) error {
 	} else {
 		flag |= os.O_EXCL
 	}
-	f, err := fsys.OpenFile(ConfigPath, flag, 0644)
+	f, err := fsys.OpenFile(ConfigPath(), flag, 0644)
 	if err != nil {
 		return errors.Errorf("failed to create config file: %w", err)
 	}

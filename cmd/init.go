@@ -58,6 +58,6 @@ func init() {
 	flags.BoolVar(createVscodeSettings, "with-vscode-settings", false, "Generate VS Code settings for Deno.")
 	flags.BoolVar(createIntellijSettings, "with-intellij-settings", false, "Generate IntelliJ IDEA settings for Deno.")
 	flags.BoolVar(&initParams.UseOrioleDB, "use-orioledb", false, "Use OrioleDB storage engine for Postgres.")
-	flags.BoolVar(&initParams.Overwrite, "force", false, "Overwrite existing "+utils.ConfigPath+".")
+	flags.BoolVar(&initParams.Overwrite, "force", false, "Overwrite existing "+utils.ConfigPath()+".")
 	rootCmd.AddCommand(initCmd)
 }

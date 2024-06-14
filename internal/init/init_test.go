@@ -21,7 +21,7 @@ func TestInitCommand(t *testing.T) {
 		// Run test
 		assert.NoError(t, Run(context.Background(), fsys, nil, nil, utils.InitParams{}))
 		// Validate generated config.toml
-		exists, err := afero.Exists(fsys, utils.ConfigPath)
+		exists, err := afero.Exists(fsys, utils.ConfigPath())
 		assert.NoError(t, err)
 		assert.True(t, exists)
 		// Validate generated .gitignore
@@ -48,7 +48,7 @@ func TestInitCommand(t *testing.T) {
 	t.Run("throws error when config file exists", func(t *testing.T) {
 		// Setup in-memory fs
 		fsys := &afero.MemMapFs{}
-		_, err := fsys.Create(utils.ConfigPath)
+		_, err := fsys.Create(utils.ConfigPath())
 		require.NoError(t, err)
 		// Run test
 		assert.Error(t, Run(context.Background(), fsys, nil, nil, utils.InitParams{}))
@@ -56,7 +56,7 @@ func TestInitCommand(t *testing.T) {
 
 	t.Run("throws error on permission denied", func(t *testing.T) {
 		// Setup in-memory fs
-		fsys := &fstest.OpenErrorFs{DenyPath: utils.ConfigPath}
+		fsys := &fstest.OpenErrorFs{DenyPath: utils.ConfigPath()}
 		// Run test
 		err := Run(context.Background(), fsys, nil, nil, utils.InitParams{})
 		// Check error

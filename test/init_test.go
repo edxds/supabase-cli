@@ -28,7 +28,7 @@ func (suite *InitTestSuite) TestInit() {
 	require.NoError(suite.T(), init.RunE(init, []string{}))
 
 	// check if init dir exists
-	_, err = os.Stat(utils.ConfigPath)
+	_, err = os.Stat(utils.ConfigPath())
 	require.NoError(suite.T(), err)
 }
 

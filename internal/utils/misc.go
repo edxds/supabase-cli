@@ -184,7 +184,6 @@ var (
 	}
 
 	SupabaseDirPath       = "supabase"
-	ConfigPath            = filepath.Join(SupabaseDirPath, "config.toml")
 	GitIgnorePath         = filepath.Join(SupabaseDirPath, ".gitignore")
 	TempDir               = filepath.Join(SupabaseDirPath, ".temp")
 	ImportMapsDir         = filepath.Join(TempDir, "import_maps")
@@ -257,7 +256,7 @@ func IsGitRepo() bool {
 // Otherwise, the `os.Getwd()` is kept as is.
 func getProjectRoot(absPath string, fsys afero.Fs) string {
 	for cwd := absPath; ; cwd = filepath.Dir(cwd) {
-		path := filepath.Join(cwd, ConfigPath)
+		path := filepath.Join(cwd, ConfigPath())
 		// Treat all errors as file not exists
 		if isSupaProj, err := afero.Exists(fsys, path); isSupaProj {
 			return cwd
@@ -298,6 +297,14 @@ func ChangeWorkDir(fsys afero.Fs) error {
 	return nil
 }
 
+func ConfigPath() string {
+	var configFile string
+	if configFile = viper.GetString("config"); len(configFile) == 0 {
+		configFile = "config.toml"
+	}
+	return filepath.Join(SupabaseDirPath, configFile)
+}
+
 func IsBranchNameReserved(branch string) bool {
 	switch branch {
 	case "_current_branch", "main", "postgres", "template0", "template1":
@@ -330,8 +337,8 @@ func WriteFile(path string, contents []byte, fsys afero.Fs) error {
 }
 
 func AssertSupabaseCliIsSetUpFS(fsys afero.Fs) error {
-	if _, err := fsys.Stat(ConfigPath); errors.Is(err, os.ErrNotExist) {
-		return errors.Errorf("Cannot find %s in the current directory. Have you set up the project with %s?", Bold(ConfigPath), Aqua("supabase init"))
+	if _, err := fsys.Stat(ConfigPath()); errors.Is(err, os.ErrNotExist) {
+		return errors.Errorf("Cannot find %s in the current directory. Have you set up the project with %s?", Bold(ConfigPath()), Aqua("supabase init"))
 	} else if err != nil {
 		return errors.Errorf("failed to read config file: %w", err)
 	}

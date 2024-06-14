@@ -30,7 +30,7 @@ func TestStartCommand(t *testing.T) {
 	t.Run("throws error on invalid config", func(t *testing.T) {
 		// Setup in-memory fs
 		fsys := afero.NewMemMapFs()
-		require.NoError(t, afero.WriteFile(fsys, utils.ConfigPath, []byte("malformed"), 0644))
+		require.NoError(t, afero.WriteFile(fsys, utils.ConfigPath(), []byte("malformed"), 0644))
 		// Run test
 		err := Run(context.Background(), fsys, []string{}, false)
 		// Check error
