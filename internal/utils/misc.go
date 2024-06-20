@@ -19,7 +19,7 @@ import (
 
 // Assigned using `-ldflags` https://stackoverflow.com/q/11354518
 var (
-	Version   = "1.176.11"
+	Version   = "1.178.2"
 	SentryDsn string
 )
 
